@@ -374,11 +374,17 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, "No Image", "No valid image found in clipboard")
                 return
             
-            # Convert QImage to PIL Image
-            buffer = io.BytesIO()
+            # Convert QImage to PIL Image using QBuffer
+            from PyQt5.QtCore import QBuffer, QIODevice
+            
+            buffer = QBuffer()
+            buffer.open(QIODevice.WriteOnly)
             q_image.save(buffer, "PNG")
-            buffer.seek(0)
-            pil_image = Image.open(buffer)
+            buffer.close()
+            
+            # Get bytes and convert to PIL Image
+            image_bytes = buffer.data().data()
+            pil_image = Image.open(io.BytesIO(image_bytes))
             
             # Process the pasted image
             self.process_capture(pil_image)
